@@ -30,7 +30,7 @@ make install
 
 This command will import all dependancies in a **vendor** folder on root project, build this application (CLI), and finally add an environment variable to use this CLI through any terminal just make `slacker`.
 
-> ⓘ Calm down, this command don't write in any files, just add env using `export` command. So if you restart your PC/Mac (for purist), enrivonment variable will be remove. You can make `make set-env` to set path variable.
+> ⓘ Calm down, this command don't write in any files, just add env using `export` command. So if you restart your PC/Mac (for purist), enrivonment variable will be remove.
 
 ---
 
