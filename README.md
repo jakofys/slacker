@@ -42,7 +42,7 @@ If you use Slack API, is because you already have a Slack workspace, and generat
 Then, make:
 
 ```bash
-slacker set-token [token-app]
+slacker set [token-app]
 ```
 
 And now, your cli is ready to use.
