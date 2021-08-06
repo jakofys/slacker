@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -14,32 +14,29 @@ func main() {
 		Name:  "slacker",
 		Usage: "Slack API implementation",
 		Commands: []cli.Command{
-			cli.Command{
+			{
 				Name:        "set",
 				Description: "Set Slack token application",
 				Action:      SetToken,
 			},
-			cli.Command{
+			{
 				Name:        "sendto",
 				Description: "Send a message to a user by email",
 				Action:      SendTo,
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:  "notifier",
-						Value: "info",
-					},
-				},
 			},
 		},
 	}
 
-	app.Run(os.Args)
+	if err := app.Run(os.Args); err != nil {
+		panic(err)
+	}
 }
 
 func SetToken(ctx *cli.Context) {
 
-	if ioutil.WriteFile("token", []byte(ctx.Args()[0]), 0644) != nil {
-		panic(errors.New("File problem"))
+	if err := ioutil.WriteFile("token", []byte(ctx.Args()[0]), 0644); err != nil {
+		fmt.Printf("Internal error: %s\n", err)
+		return
 	}
 
 }
@@ -47,18 +44,20 @@ func SetToken(ctx *cli.Context) {
 func SendTo(ctx *cli.Context) {
 	token, err := ioutil.ReadFile("token")
 	if err != nil {
-		panic(errors.New("File problem"))
+		fmt.Println("No token available, to register a token, make: 'slacker set-token [token]'")
+		return
 	}
 
 	app := slack.New(string(token))
 	if ok := ctx.Args()[0]; ok == "" {
-		panic(errors.New("Data don't give"))
+		fmt.Println("You have to indicate and email and message as: \n slacker sendto 'dupont@example.com' 'You message'")
+		return
 	}
 	user, err := app.GetUserByEmail(ctx.Args()[0])
 	if err != nil {
-		panic(errors.New("User not found"))
+		fmt.Printf("User for email %s not found \n", ctx.Args()[0])
+		return
 	}
-
 	conv := &slack.OpenConversationParameters{
 		ReturnIM: true,
 		Users: []string{
@@ -69,6 +68,10 @@ func SendTo(ctx *cli.Context) {
 	if err != nil {
 		panic(err)
 	}
-	app.SendMessage(channel.ID, slack.MsgOptionText(ctx.Args()[1], false))
+
+	_, _, _, err = app.SendMessage(channel.ID, slack.MsgOptionText(ctx.Args()[1], false))
+	if err != nil {
+		panic(err)
+	}
 
 }
